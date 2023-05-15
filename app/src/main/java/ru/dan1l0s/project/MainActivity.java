@@ -2,8 +2,9 @@ package ru.dan1l0s.project;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -12,11 +13,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -25,16 +27,21 @@ import java.util.List;
 import ru.dan1l0s.project.recycler_view_adapter.Adapter;
 import ru.dan1l0s.project.task.AddTask;
 import ru.dan1l0s.project.task.Task;
+import ru.dan1l0s.project.task.UpdateTask;
 
 public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskListener{
 
     private RecyclerView ListRecyclerView;
+    private TextView textView;
     private Adapter adapter;
     private List<Task> list;
 
     private DatabaseReference database;
     String TASK_KEY = "Tasks";
     private FloatingActionButton floatingActionButton;
+
+    FirebaseAuth mAuth;
+    Button btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,12 +50,16 @@ public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskLi
         ListRecyclerView = findViewById(R.id.listRecyclerView);
         floatingActionButton = findViewById(R.id.floating_action_button);
 
+
         getSupportActionBar().hide(); // same as in activity_loading
         database = FirebaseDatabase.getInstance("https://to-do-list-project-data-ba" +
                 "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference(TASK_KEY);
 
+
+
+        mAuth = FirebaseAuth.getInstance();
         getDataFromDB();
-        initRecyclerView();
+        initialisation();
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -59,6 +70,25 @@ public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskLi
             }
         });
 
+        btnLogout = findViewById(R.id.logoutButton);
+        btnLogout.setOnClickListener(v -> {
+            mAuth.signOut();
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        });
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null)
+        {
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        }
+        else {
+            textView.setText("Signed in as " + mAuth.getCurrentUser().getEmail());
+        }
     }
 
     private void getDataFromDB() {
@@ -85,8 +115,9 @@ public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskLi
         database.addValueEventListener(vListener);
     }
 
-    private void initRecyclerView()
+    private void initialisation()
     {
+        textView = findViewById(R.id.userTitle);
         ListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         list = new ArrayList<>();
         adapter = new Adapter(this, list, this);
@@ -96,21 +127,48 @@ public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskLi
 
     @Override
     public void onTaskClick(int pos) {
-        Task tmp = list.get(pos);
-        System.out.println(tmp.getName() + " " + tmp.getId());
-        Query query = FirebaseDatabase.getInstance("https://to-do-list-project-data-ba" +
-                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference().child(TASK_KEY).orderByChild("id").equalTo(tmp.getId());
-        query.addListenerForSingleValueEvent(new ValueEventListener()
-        {
+        Task task = list.get(pos);
+        Intent intent = new Intent(MainActivity.this, UpdateTask.class);
+        intent.putExtra("id", task.getId());
+        intent.putExtra("name",task.getName());
+        intent.putExtra("desc",task.getDesc());
+        intent.putExtra("date",task.getDate());
+        intent.putExtra("time",task.getTime());
+        startActivity(intent);
+        /*
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Вы точно хотите удалить задание " + list.get(pos).getName() + "?").setCancelable(false)
+                .setPositiveButton("Да", new DialogInterface.OnClickListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                    snapshot.getRef().removeValue();
-                }
+            public void onClick(DialogInterface dialog, int which) {
+                Task tmp = list.get(pos);
+                System.out.println(tmp.getName() + " " + tmp.getId());
+                Query query = FirebaseDatabase.getInstance("https://to-do-list-project-data-ba" +
+                        "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference().child(TASK_KEY).orderByChild("id").equalTo(tmp.getId());
+                query.addListenerForSingleValueEvent(new ValueEventListener()
+                {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                            snapshot.getRef().removeValue();
+                        }
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+
+                });
             }
+        }).setNegativeButton("Нет", new DialogInterface.OnClickListener() {
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                Toast.makeText(MainActivity.this, "ладно", Toast.LENGTH_SHORT).show();
             }
         });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+         */
     }
 }

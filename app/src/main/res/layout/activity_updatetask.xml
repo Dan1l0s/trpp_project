@@ -4,74 +4,69 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DBTestActivity">
+    tools:context=".task.AddTask">
 
     <Button
-        android:id="@+id/saveButton"
+        android:id="@+id/updateSaveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onClickSaveButt"
-        android:text="Save"
-        app:layout_constraintStart_toStartOf="@+id/dateText"
-        app:layout_constraintTop_toTopOf="@+id/loadButton" />
-
-    <Button
-        android:id="@+id/loadButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:onClick="onClickLoadButt"
-        android:text="Load"
-        app:layout_constraintEnd_toEndOf="@+id/dateText"
-        app:layout_constraintTop_toBottomOf="@+id/dateText" />
+        android:layout_marginTop="40dp"
+        android:text="@string/button_text_update"
+        app:layout_constraintEnd_toEndOf="@+id/updateDateText"
+        app:layout_constraintStart_toStartOf="@+id/updateDateText"
+        app:layout_constraintTop_toBottomOf="@+id/updateDateText" />
 
     <EditText
-        android:id="@+id/nameText"
+        android:id="@+id/updateNameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
-        android:ems="10"
-        android:hint="Task headline"
+        android:ems="11"
+        android:hint="@string/task_name_hint"
         android:inputType="textPersonName"
+        android:singleLine="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/descText"
+        android:id="@+id/updateDescText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:ems="10"
-        android:hint="Task description"
+        android:ems="11"
+        android:hint="@string/task_desc_hint"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nameText" />
+        app:layout_constraintTop_toBottomOf="@+id/updateNameText" />
 
     <EditText
-        android:id="@+id/dateText"
+        android:id="@+id/updateDateText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:ems="10"
-        android:hint="Deadline date"
+        android:ems="11"
+        android:hint="@string/task_date_hint"
         android:inputType="date"
+        android:layout_marginTop="50dp"
+        android:maxLength="10"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timeText" />
+        app:layout_constraintTop_toBottomOf="@+id/updateTimeText" />
 
     <EditText
-        android:id="@+id/timeText"
+        android:id="@+id/updateTimeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:ems="10"
-        android:hint="Deadline time"
+        android:ems="11"
+        android:maxLength="5"
+        android:hint="@string/task_time_hint"
         android:inputType="time"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/descText" />
+        app:layout_constraintTop_toBottomOf="@+id/updateDescText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
