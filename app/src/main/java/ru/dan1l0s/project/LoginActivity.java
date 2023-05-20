@@ -23,13 +23,13 @@ import java.util.Objects;
 
 
 public class LoginActivity extends AppCompatActivity {
-    TextInputEditText editTextEmail;
-    TextInputEditText editTextPass;
-    ImageView imageView;
-    TextView textViewRegLink;
-    Button buttonLogin;
+    private TextInputEditText editTextEmail;
+    private TextInputEditText editTextPass;
+    private ImageView imageView;
+    private TextView textViewRegLink;
+    private Button buttonLogin;
 
-    FirebaseAuth mAuth;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,21 +39,15 @@ public class LoginActivity extends AppCompatActivity {
 
         Objects.requireNonNull(getSupportActionBar()).hide();
 
-        imageView = findViewById(R.id.imageLogView);
         editTextEmail = findViewById(R.id.etLoginEmail);
         editTextPass = findViewById(R.id.etLoginPass);
         textViewRegLink = findViewById(R.id.tvRegisterHere);
         buttonLogin = findViewById(R.id.btnLogin);
 
-
         mAuth = FirebaseAuth.getInstance();
 
-        buttonLogin.setOnClickListener(v -> {
-            loginUser();
-        });
-        textViewRegLink.setOnClickListener(v -> {
-            startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
-        });
+        buttonLogin.setOnClickListener(v -> {loginUser();});
+        textViewRegLink.setOnClickListener(v -> {startActivity(new Intent(LoginActivity.this, SignUpActivity.class));});
     }
 
     private void loginUser()
@@ -63,13 +57,13 @@ public class LoginActivity extends AppCompatActivity {
 
         if (TextUtils.isEmpty(email))
         {
-            editTextEmail.setError("Email не может быть пустым");
+            editTextEmail.setError(getString(R.string.reg_email_error));
             editTextEmail.requestFocus();
         }
         else if (TextUtils.isEmpty(password))
         {
             imageView.setVisibility(View.VISIBLE);
-            editTextPass.setError("Пароль не может быть пустым");
+            editTextPass.setError(getString(R.string.reg_pass_error));
             editTextPass.requestFocus();
         }
         else
@@ -81,17 +75,17 @@ public class LoginActivity extends AppCompatActivity {
                     {
                         if (!mAuth.getCurrentUser().isEmailVerified())
                         {
-                            Toast.makeText(LoginActivity.this, "Необходимо подтверждение почты", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, getString(R.string.email_auth_error), Toast.LENGTH_SHORT).show();
                         }
-                        else {
-                            Toast.makeText(LoginActivity.this, "Вход выполнен успешно", Toast.LENGTH_SHORT).show();
+                        else
+                        {
+                            Toast.makeText(LoginActivity.this, getString(R.string.login_succ), Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         }
                     }
                     else
                     {
-                        imageView.setVisibility(View.VISIBLE);
-                        Toast.makeText(LoginActivity.this, "Ошибка при входе: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, getString(R.string.login_error) + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             });

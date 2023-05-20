@@ -22,12 +22,12 @@ import java.util.Objects;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    TextInputEditText RegEmail;
-    TextInputEditText RegPass;
-    TextView LoginMessage;
-    Button buttonReg;
+    private TextInputEditText RegEmail;
+    private TextInputEditText RegPass;
+    private TextView LoginMessage;
+    private Button buttonReg;
 
-    FirebaseAuth mAuth;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,27 +43,24 @@ public class SignUpActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        buttonReg.setOnClickListener(view -> {
-            createUser();
-        });
+        buttonReg.setOnClickListener(v -> {createUser();});
 
-        LoginMessage.setOnClickListener(v -> {
-            finish();
-        });
+        LoginMessage.setOnClickListener(v -> {finish();});
     }
 
-    private void createUser(){
+    private void createUser()
+    {
         String email = RegEmail.getText().toString();
         String password = RegPass.getText().toString();
 
         if (TextUtils.isEmpty(email))
         {
-            RegEmail.setError("Email не может быть пустым");
+            RegEmail.setError(getString(R.string.reg_email_error));
             RegEmail.requestFocus();
         }
         else if (TextUtils.isEmpty(password))
         {
-            RegPass.setError("Пароль не может быть пустым");
+            RegPass.setError(getString(R.string.reg_pass_error));
             RegPass.requestFocus();
         }
         else
@@ -73,14 +70,14 @@ public class SignUpActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful())
                     {
-                        //Toast.makeText(SignUpActivity.this, "Регистрация прошла успешно", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(SignUpActivity.this, getString(R.string.auth_reminder), Toast.LENGTH_SHORT).show();
                         sendEmailVer();
 
                         finish();
                     }
                     else
                     {
-                        Toast.makeText(SignUpActivity.this, "Ошибка при регистрации: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(SignUpActivity.this, getString(R.string.reg_error) + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -89,17 +86,16 @@ public class SignUpActivity extends AppCompatActivity {
     private void sendEmailVer()
     {
         FirebaseUser user = mAuth.getCurrentUser();
-        assert user != null;
         user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful())
                 {
-                    Toast.makeText(SignUpActivity.this, "Необходимо подтверждение почты (Вам было отправлено письмо)", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUpActivity.this, getString(R.string.email_auth_error), Toast.LENGTH_SHORT).show();
                 }
                 else
                 {
-                    Toast.makeText(SignUpActivity.this, "Ошибка отправки письма на почту", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUpActivity.this, getString(R.string.email_failed), Toast.LENGTH_SHORT).show();
                 }
             }
         });

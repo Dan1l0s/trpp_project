@@ -30,7 +30,7 @@ public class LoadingActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).hide();
         list = new ArrayList<>();
         db = FirebaseDatabase.getInstance("https://to-do-list-project-data-ba" +
-                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference("Tasks").child(Constants.USER_UID);
+                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference(Constants.USERS_KEY).child(Constants.USER_UID);
         Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
         getFromDB();
         new Handler().postDelayed(new Runnable()
@@ -41,14 +41,15 @@ public class LoadingActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             }
-        }, 1000);
+        }, 1500);
     }
     private void getFromDB() {
         ValueEventListener vListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (list.size() > 0) list.clear();
-                for (DataSnapshot ds : snapshot.getChildren()) {
+                for (DataSnapshot ds : snapshot.getChildren())
+                {
                     Task task = ds.getValue(Task.class);
                     list.add(task);
                 }

@@ -12,16 +12,14 @@ import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import org.w3c.dom.Text;
+import java.util.Objects;
 
 import ru.dan1l0s.project.Constants;
-import ru.dan1l0s.project.MainActivity;
 import ru.dan1l0s.project.R;
 
 public class AddTask extends AppCompatActivity {
     private EditText nameText, descText, timeText, dateText;
     private DatabaseReference database;
-    private String TASK_KEY = "Tasks";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,11 +27,12 @@ public class AddTask extends AppCompatActivity {
         setContentView(R.layout.activity_addtask);
         initElem();
         database = FirebaseDatabase.getInstance("https://to-do-list-project-data-ba" +
-                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference(TASK_KEY).child(Constants.USER_UID);
+                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference(Constants.USERS_KEY).child(Constants.USER_UID);
     }
 
     private void initElem()
     {
+        Objects.requireNonNull(getSupportActionBar()).hide();
         nameText = findViewById(R.id.addNameText);
         descText = findViewById(R.id.addDescText);
         timeText = findViewById(R.id.addTimeText);
@@ -56,8 +55,10 @@ public class AddTask extends AppCompatActivity {
                 {
                     if (s.charAt(0)-'0' > 3)   s.replace(0, 1, "");
                 }
-                else if (s.length() == 2) {
-                    if (s.charAt(0)-'0' == 3) {
+                else if (s.length() == 2)
+                {
+                    if (s.charAt(0)-'0' == 3)
+                    {
                         if (s.charAt(1)-'0' > 1) s.replace(1, 2, "");
                     }
                 }
@@ -68,7 +69,8 @@ public class AddTask extends AppCompatActivity {
                     {
                         s.replace(2, 3, "");
                     }
-                    else {
+                    else
+                    {
                         s.insert(2,"/");
                     }
                 }
@@ -100,27 +102,31 @@ public class AddTask extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(Editable s)
+            {
                 if (s.length() == 1)
                 {
                     if (s.charAt(0)-'0' > 2)   s.replace(0, 1, "");
                 }
-                else if (s.length() == 2) {
-                    if (s.charAt(0)-'0' == 2) {
+                else if (s.length() == 2)
+                {
+                    if (s.charAt(0)-'0' == 2)
+                    {
                         if (s.charAt(1)-'0' > 3) s.replace(1, 2, "");
                     }
                 }
                 else if (s.length() == 3)
                 {
-                        if (s.charAt(2) == ':') s.replace(2, 3, "");
-                        else if (s.charAt(2)-'0' > 5)
-                        {
-                            s.replace(2, 3, "");
-                        }
-                        else {
-                            s.insert(2,":");
-                        }
+                    if (s.charAt(2) == ':') s.replace(2, 3, "");
+                    else if (s.charAt(2)-'0' > 5)
+                    {
+                        s.replace(2, 3, "");
                     }
+                    else
+                    {
+                        s.insert(2,":");
+                    }
+                }
             }
         };
         dateText.addTextChangedListener(dateWatcher);
@@ -134,31 +140,33 @@ public class AddTask extends AppCompatActivity {
         String time = timeText.getText().toString();
         String date = dateText.getText().toString();
 
-        if (TextUtils.isEmpty(name)) nameText.setError("Поле не может быть пустым");
-        if (TextUtils.isEmpty(desc)) descText.setError("Поле не может быть пустым");
-        if (TextUtils.isEmpty(date)) dateText.setError("Поле не может быть пустым");
+        if (TextUtils.isEmpty(name)) nameText.setError(getString(R.string.edit_text_empty));
+        if (TextUtils.isEmpty(desc)) descText.setError(getString(R.string.edit_text_empty));
+        if (!TextUtils.isEmpty(date) && date.length() != 10) dateText.setError(getString(R.string.edit_text_empty));
         if (TextUtils.isEmpty(name))
             nameText.requestFocus();
         else if (TextUtils.isEmpty(desc))
             descText.requestFocus();
-        else if (TextUtils.isEmpty(date))
+        else if (!TextUtils.isEmpty(date) && date.length() < 10)
             dateText.requestFocus();
+        if (TextUtils.isEmpty(date)) date = "31/12/2099";
         if (time.length() == 1) time+="0:00";
         if (time.length() == 2) time+=":00";
         if (time.length() == 4) time+="0";
 
         if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(desc)
-                && !TextUtils.isEmpty(date))
+                && (date.length() == 10 || date.length() == 0))
         {
             if (time.isEmpty()) time = "23:59";
             String id = database.push().getKey();
-            Task newTask = new Task(id, name, desc, time, date);;
+            Task newTask = new Task(id, name, desc, time, date);
             database.child(id).setValue(newTask);
-            Toast.makeText(this, "Сохранено", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.save_task_succ), Toast.LENGTH_SHORT).show();
             finish();
         }
-        else {
-            Toast.makeText(this, "Одно из полей было пропущено", Toast.LENGTH_SHORT).show();
-        }
+        else if (date.length() != 10 && date.length() != 0)
+            Toast.makeText(this, getString(R.string.save_task_incorrect_date), Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(this, getString(R.string.save_task_error), Toast.LENGTH_SHORT).show();
     }
 }

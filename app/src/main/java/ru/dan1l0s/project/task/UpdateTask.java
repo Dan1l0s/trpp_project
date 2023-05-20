@@ -14,6 +14,8 @@ import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.Objects;
+
 import ru.dan1l0s.project.Constants;
 import ru.dan1l0s.project.R;
 
@@ -21,19 +23,19 @@ public class UpdateTask extends AppCompatActivity {
     private EditText nameText, descText, timeText, dateText;
     private DatabaseReference database;
     private Task task;
-    private String TASK_KEY = "Tasks";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_updatetask);
         database = FirebaseDatabase.getInstance("https://to-do-list-project-data-ba" +
-                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference(TASK_KEY).child(Constants.USER_UID);
+                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference(Constants.USERS_KEY).child(Constants.USER_UID);
         initElem();
     }
 
     private void initElem()
     {
+        Objects.requireNonNull(getSupportActionBar()).hide();
         nameText = findViewById(R.id.updateNameText);
         descText = findViewById(R.id.updateDescText);
         timeText = findViewById(R.id.updateTimeText);
@@ -64,10 +66,12 @@ public class UpdateTask extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 if (s.length() == 1)
                 {
-                    if (s.charAt(0)-'0' > 3)   s.replace(0, 1, "");
+                    if (s.charAt(0)-'0' > 3) s.replace(0, 1, "");
                 }
-                else if (s.length() == 2) {
-                    if (s.charAt(0)-'0' == 3) {
+                else if (s.length() == 2)
+                {
+                    if (s.charAt(0)-'0' == 3)
+                    {
                         if (s.charAt(1)-'0' > 1) s.replace(1, 2, "");
                     }
                 }
@@ -78,7 +82,8 @@ public class UpdateTask extends AppCompatActivity {
                     {
                         s.replace(2, 3, "");
                     }
-                    else {
+                    else
+                    {
                         s.insert(2,"/");
                     }
                 }
@@ -115,8 +120,10 @@ public class UpdateTask extends AppCompatActivity {
                 {
                     if (s.charAt(0)-'0' > 2)   s.replace(0, 1, "");
                 }
-                else if (s.length() == 2) {
-                    if (s.charAt(0)-'0' == 2) {
+                else if (s.length() == 2)
+                {
+                    if (s.charAt(0)-'0' == 2)
+                    {
                         if (s.charAt(1)-'0' > 3) s.replace(1, 2, "");
                     }
                 }
@@ -145,33 +152,36 @@ public class UpdateTask extends AppCompatActivity {
         String time = timeText.getText().toString();
         String date = dateText.getText().toString();
 
+        if (date.length() == 0) date = "31/12/2099";
+        if (time.length() == 0) time = "23:59";
         if (time.length() == 1) time+="0:00";
         if (time.length() == 2) time+=":00";
         if (time.length() == 4) time+="0";
 
-        task = new Task(task.getId(), name, desc, time, date);
 
-        if (TextUtils.isEmpty(name)) nameText.setError("Поле не может быть пустым");
-        if (TextUtils.isEmpty(desc)) descText.setError("Поле не может быть пустым");
-        if (TextUtils.isEmpty(date)) dateText.setError("Поле не может быть пустым");
+        if (TextUtils.isEmpty(name)) nameText.setError(getString(R.string.edit_text_empty));
+        if (TextUtils.isEmpty(desc)) descText.setError(getString(R.string.edit_text_empty));
+        if (!TextUtils.isEmpty(date) && date.length() != 10) dateText.setError(getString(R.string.edit_text_empty));
 
 
         if (TextUtils.isEmpty(name))
             nameText.requestFocus();
         else if (TextUtils.isEmpty(desc))
             descText.requestFocus();
-        else if (TextUtils.isEmpty(date))
+        else if (date.length() != 0 && date.length() < 10)
             dateText.requestFocus();
         if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(desc)
-                && !TextUtils.isEmpty(date))
+                && (date.length() == 10 || date.length() == 0))
         {
             if (time.isEmpty()) time = "23:59";
+            task = new Task(task.getId(), name, desc, time, date);
             database.child(task.getId()).setValue(task);
-            Toast.makeText(this, "Сохранено", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.save_task_succ), Toast.LENGTH_SHORT).show();
             finish();
         }
-        else {
-            Toast.makeText(this, "Одно из полей было пропущено", Toast.LENGTH_SHORT).show();
+        else
+        {
+            Toast.makeText(this, getString(R.string.save_task_error), Toast.LENGTH_SHORT).show();
         }
     }
 }

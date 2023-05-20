@@ -8,8 +8,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,7 +26,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,26 +34,25 @@ import ru.dan1l0s.project.task.AddTask;
 import ru.dan1l0s.project.task.Task;
 import ru.dan1l0s.project.task.UpdateTask;
 
-public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskListener{
-
+public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskListener
+{
     private RecyclerView ListRecyclerView;
     private TextView textView;
     private Adapter adapter;
     private List<Task> list;
 
     private DatabaseReference database;
-    String TASK_KEY = "Tasks";
     private FloatingActionButton floatingActionButton;
 
-    FirebaseAuth mAuth;
-    Button btnLogout;
+    private FirebaseAuth mAuth;
+    private Button btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        textView = findViewById(R.id.userTitle);
 
+        textView = findViewById(R.id.userTitle);
         mAuth = FirebaseAuth.getInstance();
 
         FirebaseUser user = mAuth.getCurrentUser();
@@ -68,7 +64,7 @@ public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskLi
         else
         {
             Constants.USER_UID = user.getUid();
-            textView.setText("Signed in as " + mAuth.getCurrentUser().getEmail());
+            textView.setText(getString(R.string.username_show) + " "+ mAuth.getCurrentUser().getEmail());
         }
 
         ListRecyclerView = findViewById(R.id.listRecyclerView);
@@ -77,7 +73,7 @@ public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskLi
 
         Objects.requireNonNull(getSupportActionBar()).hide();
         database = FirebaseDatabase.getInstance("https://to-do-list-project-data-ba" +
-                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference(TASK_KEY).child(Constants.USER_UID);
+                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference(Constants.USERS_KEY).child(Constants.USER_UID);
 
 
         getDataFromDB();
@@ -103,7 +99,6 @@ public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskLi
     @Override
     protected void onStart() {
         super.onStart();
-
     }
 
 
@@ -112,10 +107,12 @@ public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskLi
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (list.size() > 0) list.clear();
-                for (DataSnapshot ds : snapshot.getChildren()) {
+                for (DataSnapshot ds : snapshot.getChildren())
+                {
                     Task task = ds.getValue(Task.class);
-                    if (task == null) {
-                        Toast.makeText(MainActivity.this, "Было получено пустое задание", Toast.LENGTH_SHORT).show();
+                    if (task == null)
+                    {
+                        Toast.makeText(MainActivity.this, getString(R.string.empty_task_received), Toast.LENGTH_SHORT).show();
                         continue;
                     }
                     list.add(task);
@@ -143,21 +140,22 @@ public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskLi
 
 
     @Override
-    public void onDeleteClick(int pos) {
+    public void onDeleteClick(int pos)
+    {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Вы точно хотите удалить задание " + list.get(pos).getName() + "?").setCancelable(false)
-                .setPositiveButton("Да", new DialogInterface.OnClickListener() {
+        builder.setMessage(getString(R.string.delete_task_confirm) + " " + list.get(pos).getName() + getString(R.string.question_sign)).setCancelable(false)
+                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Task tmp = list.get(pos);
-                        System.out.println(tmp.getName() + " " + tmp.getId());
                         Query query = FirebaseDatabase.getInstance("https://to-do-list-project-data-ba" +
-                                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference().child(TASK_KEY).child(Constants.USER_UID).orderByChild("id").equalTo(tmp.getId());
+                                "se-default-rtdb.europe-west1.firebasedatabase.app/").getReference().child(Constants.USERS_KEY).child(Constants.USER_UID).orderByChild("id").equalTo(tmp.getId());
                         query.addListenerForSingleValueEvent(new ValueEventListener()
                         {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                                for (DataSnapshot snapshot: dataSnapshot.getChildren())
+                                {
                                     snapshot.getRef().removeValue();
                                 }
                             }
@@ -167,11 +165,11 @@ public class  MainActivity extends AppCompatActivity implements Adapter.OnTaskLi
 
                         });
                     }
-                }).setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                Toast.makeText(MainActivity.this, "ладно", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, getString(R.string.ok_then), Toast.LENGTH_SHORT).show();
             }
         });
         AlertDialog dialog = builder.create();
